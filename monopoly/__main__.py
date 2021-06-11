@@ -1,7 +1,14 @@
-from monopoly.user import create_user, delete_users
+from monopoly.user import create_user, delete_users, all_users
 from monopoly.game import run
 import enquiries
 import art
+import sys
+
+
+def delete_last_line(count=1):
+    for i in range(count):
+        sys.stdout.write("\x1b[1A")
+        sys.stdout.write("\x1b[2K")
 
 
 def main():
@@ -23,6 +30,7 @@ def main():
         name = enquiries.freetext("What do you want to name the user?")
         create_user(name, "red")
     elif choice == "Start a new game":
+        delete_last_line(7)
         run()
     else:
         print(choice)

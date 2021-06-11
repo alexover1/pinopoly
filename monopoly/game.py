@@ -1,5 +1,6 @@
-from monopoly.user import User
+from monopoly.user import User, all_users
 from enquiries import *
+import art
 
 
 class GameMaster:
@@ -21,10 +22,11 @@ class GameMaster:
 
 
 def run():
-    game = GameMaster([User("John", "red"), User("Sarah", "green")])
+    game = GameMaster(all_users())
     round_count = 10
 
     for i in range(round_count):
+        art.tprint(f"{game.turn()}")
         choice = choose(
             f"It's {game.turn()}'s turn",
             ["Buy a property", "Buy a house or hotel", "End turn", "Exit game"],

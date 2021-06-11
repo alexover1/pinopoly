@@ -1,3 +1,2 @@
 art==5.2
 enquiries==0.1.0
-colorama==0.4.4
