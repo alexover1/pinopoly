@@ -2,5 +2,5 @@ __pycache__
 .env
 .pyc
 
-monopoly/generated/*
-!monopoly/generated/.gitkeep 
+generated/**/*
+!generated/**/.gitkeep 
