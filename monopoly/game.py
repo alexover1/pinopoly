@@ -52,7 +52,7 @@ class Game:
     def get_players(self, names):
         players = []
         for name in names:
-            dir = f"monopoly/generated/users/{name}.json"
+            dir = f"generated/users/{name}.json"
             with open(dir, "r") as f:
                 data = json.load(f)
                 user = User(data["name"], data["properties"])
@@ -61,7 +61,7 @@ class Game:
         return players
 
     def new(self):
-        with open(f"monopoly/generated/games/{self.id}.json", "w") as f:
+        with open(f"generated/games/{self.id}.json", "w") as f:
             json.dump(
                 {"turn": self.turn, "step": self.step, "players": self.players}, f
             )
@@ -76,7 +76,7 @@ class Game:
 
         self.step += 1
         update_json(
-            f"monopoly/generated/games/{self.id}.json",
+            f"generated/games/{self.id}.json",
             [{"turn": self.turn}, {"step": self.step}],
         )
 
@@ -109,7 +109,7 @@ class Game:
 
         print(art.text2art(f"{name}", font="small"))
         if confirm(f"Do you want to buy {property}?", single_key=True, default=True):
-            dir = f"monopoly/generated/users/{player.name}.json"
+            dir = f"generated/users/{player.name}.json"
             update_json(dir, [{"properties": [*player.properties, p]}])
 
         delete_last_line(11)
@@ -129,7 +129,7 @@ class Game:
 
 
 def all_games():
-    dir = "monopoly/generated/games/*.json"
+    dir = "generated/games/*.json"
     filelist = glob.glob(dir)
     games = []
 

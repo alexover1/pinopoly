@@ -16,7 +16,7 @@ class User:
         return f"{self.name}"
 
     def save(self):
-        with open(f"monopoly/generated/users/{self.name}.json", "w") as f:
+        with open(f"generated/users/{self.name}.json", "w") as f:
             json.dump(
                 {"id": self.id, "name": self.name, "properties": self.properties}, f
             )
@@ -25,14 +25,14 @@ class User:
 
 
 def delete_users():
-    dir = "monopoly/generated/users"
+    dir = "generated/users"
     filelist = glob.glob(os.path.join(dir, "*"))
     for f in filelist:
         os.remove(f)
 
 
 def all_users():
-    dir = "monopoly/generated/users/*.json"
+    dir = "generated/users/*.json"
     filelist = glob.glob(dir)
     users = []
 
