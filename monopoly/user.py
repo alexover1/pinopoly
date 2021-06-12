@@ -1,46 +1,48 @@
-import json
-import os, glob
+import os, glob, random, string, json
 
 
 class User:
-    def __init__(self, name, color):
+    def __init__(self, name, properties=[]):
         self.name = name
-        self.color = color
+        self.id = "".join(
+            random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits
+            )
+            for _ in range(16)
+        )
+        self.properties = properties
 
     def __repr__(self):
         return f"{self.name}"
 
-
-def create_user(name, color):
-    user = User(name, color)
-
-    data = {"name": name, "color": color}
-
-    with open(f"monopoly/generated/{name}.json", "w") as f:
-        json.dump(data, f)
-        f.close()
-
-    return user
+    def save(self):
+        with open(f"monopoly/generated/users/{self.name}.json", "w") as f:
+            json.dump(
+                {"id": self.id, "name": self.name, "properties": self.properties}, f
+            )
+            f.close()
+        return self
 
 
 def delete_users():
-    dir = "monopoly/generated"
+    dir = "monopoly/generated/users"
     filelist = glob.glob(os.path.join(dir, "*"))
     for f in filelist:
         os.remove(f)
 
 
 def all_users():
-    dir = "monopoly/generated/*.json"
+    dir = "monopoly/generated/users/*.json"
     filelist = glob.glob(dir)
-
     users = []
 
     for f in filelist:
         with open(f, "r") as f:
             data = json.load(f)
-            user = User(data["name"], data["color"])
+            user = User(data["name"], data["properties"])
             users.append(user)
             f.close()
 
-    return users
+    list = sorted(users, key=lambda k: k.name)
+
+    return list

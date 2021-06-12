@@ -9,3 +9,9 @@ Pinopoly is a tool to remove the "banker" player and replace them with a digital
 ## How to use
 
 Running `python3 -m monopoly` will open the user interface
+
+## Useful
+
+![Monopoly board](https://images-na.ssl-images-amazon.com/images/I/81btrHKgO0L._AC_SL1500_.jpg)
+
+[Monopoly rulebook](https://www.hasbro.com/common/instruct/00009.pdf)
