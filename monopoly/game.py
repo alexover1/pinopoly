@@ -37,7 +37,7 @@ def random_id():
 
 @dataclass
 class Game:
-    players: list[Player] = field(default_factory=lambda: [])
+    players: list = field(default_factory=lambda: [])
     id: str = ""
     turn: int = 0
     step: int = 0

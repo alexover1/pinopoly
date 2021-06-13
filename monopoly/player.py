@@ -13,7 +13,7 @@ class Player:
     name: str
     game_id: str
     balance: int = 1500
-    properties: list[int] = field(default_factory=lambda: [])
+    properties: list = field(default_factory=lambda: [])
 
     def __repr__(self):
         return f"{self.name}"
@@ -51,7 +51,7 @@ def get_players(game_id):
     return sorted(players, key=lambda k: k.name)
 
 
-def create_players(game_id: str, users: list[User]) -> list[Player]:
+def create_players(game_id: str, users: list) -> list:
     players = []
     for user in users:
         players.append(Player(user.name, game_id).save())

@@ -57,7 +57,7 @@ class Property:
     color: Colors
     price: int
     house_price: int
-    rent: list[int]
+    rent: list
     mortgage: int
 
     def __repr__(self):
