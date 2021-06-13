@@ -43,7 +43,7 @@ class Turn:
     game: Any
 
     def __post_init__(self):
-        self.player: Player = self.game.player
+        self.player: Player = self.game.players[self.game.turn]
         self.console = self.game.console
 
     def visit(self, action: str):

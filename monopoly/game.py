@@ -45,7 +45,6 @@ class Game:
 
     def __post_init__(self):
         self.players = self.get_players()
-        self.player = self.players[self.turn]
         if not self.id:
             self.id = random_id()
 
