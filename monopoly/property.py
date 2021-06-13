@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from terminaltables import AsciiTable
 from rich.table import Table
 
 

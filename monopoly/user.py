@@ -27,7 +27,7 @@ class User:
 ###########################################
 
 
-def get_users() -> list[User]:
+def get_users():
     """Returns a list of users from the generated/users directory"""
     dir = "generated/users/*.json"
     filelist = glob.glob(dir)
