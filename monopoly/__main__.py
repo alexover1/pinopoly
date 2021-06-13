@@ -1,16 +1,19 @@
-from monopoly.user import User, delete_users, all_users
-from monopoly.game import Game, all_games, run
-import enquiries, art, sys
+from monopoly.menu import Menu
+from monopoly.user import User, delete_users
+import enquiries, art
 
 
-def delete_last_line(count=1):
-    for _ in range(count):
-        sys.stdout.write("\x1b[1A")
-        sys.stdout.write("\x1b[2K")
+############################################
+# MAIN
+############################################
 
 
 def main():
+    menu = Menu()
+    menu.console.clear()
+
     art.tprint("pinopoly")
+
     options = [
         "Start a new game",
         "Resume existing game",
@@ -22,33 +25,13 @@ def main():
     choice = enquiries.choose("Welcome to pinopoly", options)
 
     if choice == "Start a new game":
-        delete_last_line(7)
-
-        players = []
-        for player in all_users():
-            players.append(player.name)
-
-        choice = enquiries.choose("Choose players:", players, multi=True)
-
-        game = Game(choice).new()
-        run(game)
+        menu.start_new_game()
     elif choice == "Resume existing game":
-        games = all_games()
-        if not len(games) > 0:
-            exit(0)
-
-        choice = enquiries.choose(
-            "Which game do you want to resume?", [*games, "Cancel"]
-        )
-
-        delete_last_line(7)
-
-        if choice == "Cancel":
-            exit(0)
-
-        run(choice)  # type: ignore
+        menu.resume_game()
     elif choice == "Add a user":
         name = enquiries.freetext("What is the player's name?")
+        if not name:
+            exit(1)
         User(name).save()
     elif choice == "Delete all users":
         if enquiries.confirm(
@@ -56,8 +39,7 @@ def main():
         ):
             delete_users()
     else:
-        delete_last_line(7)
-        exit(0)
+        menu.exit()
 
 
 if __name__ == "__main__":

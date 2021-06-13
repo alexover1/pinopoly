@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
+from terminaltables import AsciiTable
+from rich.table import Table
 
 
 ############################################
@@ -61,6 +63,21 @@ class Property:
 
     def __repr__(self):
         return f"{self.name.value}"
+
+    def table(self):
+        table = Table()
+
+        table.add_column("Rent", style="cyan")
+        table.add_column("Price", style="red")
+
+        table.add_row("base", f"${self.rent[0]}")
+        table.add_row("1 house", f"${self.rent[1]}")
+        table.add_row("2 houses", f"${self.rent[2]}")
+        table.add_row("3 houses", f"${self.rent[3]}")
+        table.add_row("4 houses", f"${self.rent[4]}")
+        table.add_row("hotel", f"${self.rent[5]}")
+
+        return table
 
 
 ############################################

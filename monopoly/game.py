@@ -1,13 +1,16 @@
-from monopoly.user import User
+from monopoly.player import Player
+from monopoly.turn import Turn, Moves
 from monopoly.property import properties
-import random, string, json, art, sys, glob, os
+from dataclasses import dataclass, field
+from rich.console import Console
 from enquiries import *
+import random, string, json, glob, os
+from pathlib import Path
 
 
-def delete_last_line(count=1):
-    for _ in range(count):
-        sys.stdout.write("\x1b[1A")
-        sys.stdout.write("\x1b[2K")
+############################################
+# GAME
+###########################################
 
 
 def update_json(fdir, values):
@@ -25,71 +28,91 @@ def update_json(fdir, values):
         f.close()
 
 
-movements = [
-    ("Buy a property", "property"),
-    ("Buy a house or hotel", "house"),
-    ("End turn", "end"),
-    ("Exit game", "exit"),
-]
+def random_id():
+    return "".join(
+        random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+        for _ in range(16)
+    )
 
 
+@dataclass
 class Game:
-    def __init__(self, players, id=None, turn=0, step=1):
-        self.players = self.get_players(players)
-        self.turn = turn
-        self.step = step
+    players: list[Player] = field(default_factory=lambda: [])
+    id: str = ""
+    turn: int = 0
+    step: int = 0
+    console = Console()
 
-        self.id = id or "".join(
-            random.choice(
-                string.ascii_uppercase + string.ascii_lowercase + string.digits
-            )
-            for _ in range(16)
-        )
+    def __post_init__(self):
+        self.players = self.get_players()
+        self.player = self.players[self.turn]
+        if not self.id:
+            self.id = random_id()
 
     def __repr__(self):
         return f"Game {self.id}"
 
-    def get_players(self, names):
+    def get_players(self):
+        dir = f"generated/{self.id}/players/*.json"
+        filelist = glob.glob(dir)
+
         players = []
-        for name in names:
-            dir = f"generated/users/{name}.json"
-            with open(dir, "r") as f:
+        for fn in filelist:
+            with open(fn, "r") as f:
+                name = os.path.basename(fn).split(".")[0]
                 data = json.load(f)
-                user = User(data["name"], data["properties"])
-                players.append(user)
+                players.append(
+                    Player(name, self.id, data["balance"], data["properties"])
+                )
                 f.close()
-        return players
+
+        return sorted(players, key=lambda k: k.name)
 
     def new(self):
-        with open(f"generated/games/{self.id}.json", "w") as f:
+        os.mkdir(f"generated/{self.id}")
+        os.mkdir(f"generated/{self.id}/players")
+
+        with open(f"generated/{self.id}/game.json", "w") as f:
             json.dump(
-                {"turn": self.turn, "step": self.step, "players": self.players}, f
+                {"turn": self.turn, "step": self.step},
+                f,
+                indent=2,
+                sort_keys=True,
             )
             f.close()
         return self
 
+    def update_players(self, players):
+        self.players = players
+
     def advance(self):
+        """Called at the end of a player's turn, advances to the next player's turn"""
         if (self.turn + 1) > len(self.players) - 1:
             self.turn = 0
         else:
             self.turn += 1
 
         self.step += 1
+        self.player = self.players[self.turn]
+
         update_json(
-            f"generated/games/{self.id}.json",
+            f"generated/{self.id}/game.json",
             [{"turn": self.turn}, {"step": self.step}],
         )
 
     def take_turn(self):
-        art.tprint(f"{self.players[self.turn]}")
+        self.console.clear()
+        with open("monopoly/assets/bank.txt", "r") as f:
+            a = f.read()
+            self.console.print(a)
         choice = choose(
             f"It's {self.players[self.turn]}'s turn",
             ["Buy a property", "Buy a house or hotel", "End turn", "Exit game"],
         )
 
-        for m in movements:
-            if choice == m[0]:
-                self.play(m[1])
+        for m in Moves:
+            if choice == m.value[0]:
+                Turn(self).visit(m.value[1])
 
     def play(self, move):
         method_name = f"play_{move}"
@@ -100,45 +123,49 @@ class Game:
         raise Exception(f"Missing play_ method")
 
     def play_property(self):
-        player = self.players[self.turn]
-        delete_last_line(7)
+        with open("monopoly/assets/house.txt", "r") as f:
+            a = f.read()
+            self.console.print(a)
 
         p = random.randint(0, len(properties) - 1)
         property = properties[p]
-        name = property.name.value.replace(" ", "\n")
 
-        print(art.text2art(f"{name}", font="small"))
+        self.console.print(property.table())
+
         if confirm(f"Do you want to buy {property}?", single_key=True, default=True):
-            dir = f"generated/users/{player.name}.json"
-            update_json(dir, [{"properties": [*player.properties, p]}])
+            dir = f"generated/{self.id}/{self.player.name}.json"
+            update_json(dir, [{"properties": [*self.player.properties, p]}])
 
-        delete_last_line(11)
+        self.console.clear()
         self.advance()
 
     def play_house(self):
-        delete_last_line(7)
-        self.advance()
+        with open("monopoly/assets/bank.txt", "r") as f:
+            a = f.read()
+            self.console.print(a)
+        if confirm(f"Do you want to yes?", single_key=True):
+            self.console.clear()
+            self.advance()
 
     def play_end(self):
-        delete_last_line(7)
         self.advance()
 
     def play_exit(self):
-        delete_last_line(7)
         exit(0)
 
 
 def all_games():
-    dir = "generated/games/*.json"
+    dir = "generated/**/game.json"
     filelist = glob.glob(dir)
     games = []
 
     for fn in filelist:
+        path = Path(fn)
+
         with open(fn, "r") as f:
-            id = os.path.basename(fn).split(".")[0]
             data = json.load(f)
-            game = Game(data["players"], id, data["turn"], data["step"])
-            games.append(game)
+            id = os.path.basename(path.parent.absolute())
+            games.append(Game(id=id, turn=data["turn"], step=data["step"]))
             f.close()
 
     return games
