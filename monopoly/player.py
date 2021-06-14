@@ -1,5 +1,7 @@
-from monopoly.user import User
+from monopoly.property import Colors, properties
 from dataclasses import dataclass, field
+from rich.table import Table
+from rich import box
 import os, glob, json
 
 
@@ -20,7 +22,6 @@ class Player:
 
     def save(self):
         with open(f"generated/{self.game_id}/players/{self.name}.json", "w") as f:
-            print(self.__dict__)
             json.dump({"balance": self.balance, "properties": self.properties}, f)
             f.close()
         return self
@@ -29,6 +30,53 @@ class Player:
         self.balance = newbal
         self.save()
         return self
+
+    def buy_property(self, property):
+        self.properties.append(property.id())
+        self.balance -= property.price
+        self.save()
+        property.update_ownership(self).save(self.game_id)
+        return self
+
+    def get_properties(self):
+        list = []
+        for p in self.properties:
+            property = properties[p].load(self.game_id)
+            property.update_ownership(self)
+            list.append(property)
+
+        return list
+
+    def properties_table(self):
+        properties = self.get_properties()
+
+        table = Table()
+        table.box = box.SIMPLE
+
+        table.add_column("Property")
+        table.add_column("Price", style="green")
+        table.add_column("House price", style="cyan")
+        table.add_column("Rent", style="cyan")
+        table.add_column("Mortgage", style="green")
+
+        for p in properties:
+            table.add_row(
+                f"{p.colored()}",
+                f"${p.price}",
+                f"${p.house_price}",
+                f"${p.rent[p.house_count]}",
+                f"${p.mortgage}",
+            )
+
+        return table
+
+    def has_full_set(self, color: Colors):
+        property_list = list(filter(lambda p: p.color == color, self.get_properties()))
+
+        if color == (Colors.BROWN or Colors.BLUE):
+            return len(property_list) == 2
+
+        return len(property_list) == 3
 
 
 ############################################

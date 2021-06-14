@@ -70,6 +70,7 @@ class Game:
     def new(self):
         os.mkdir(f"generated/{self.id}")
         os.mkdir(f"generated/{self.id}/players")
+        os.mkdir(f"generated/{self.id}/properties")
 
         with open(f"generated/{self.id}/game.json", "w") as f:
             json.dump(
@@ -106,7 +107,13 @@ class Game:
             self.console.print(a)
         choice = choose(
             f"It's {self.players[self.turn]}'s turn",
-            ["Buy a property", "Buy a house or hotel", "End turn", "Exit game"],
+            [
+                "Buy a property",
+                "Buy a house or hotel",
+                "Pay rent",
+                "End turn",
+                "Exit game",
+            ],
         )
 
         for m in Moves:

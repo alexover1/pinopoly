@@ -17,7 +17,11 @@ class Menu:
 
     def start_new_game(self):
         self.console.clear()
+
         users = get_users()
+        if not users:
+            exit(0)
+
         chosen_users = enquiries.choose("Choose players:", users, multi=True)
 
         game = Game().new()

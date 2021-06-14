@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum
+import json
+from pathlib import Path
+from typing import Any
 from rich.table import Table
+from rich import box
 
 
 ############################################
@@ -30,7 +34,7 @@ class Properties(Enum):
     NORTH_CAROLINA_AVENUE = "North Carolina Avenue"
     PENNSYLVANIA_AVENUE = "Pennsylvania Avenue"
     PARK_PLACE = "Park Place"
-    BOARDWALK = "Board Walk"
+    BOARDWALK = "Boardwalk"
 
 
 class Colors(Enum):
@@ -59,22 +63,85 @@ class Property:
     house_price: int
     rent: list
     mortgage: int
+    owner: Any = None
+    house_count: int = 0
 
     def __repr__(self):
         return f"{self.name.value}"
 
+    def id(self):
+        return properties.index(self.base_self())
+
+    def colored(self):
+        color = self.color.value.lower()
+
+        if self.color == Colors.BROWN:
+            color = "orange4"
+        elif self.color == Colors.LIGHTBLUE:
+            color = "turquoise2"
+
+        return f"[{color}]{self.name.value}[/{color}]"
+
+    def load(self, game_id):
+        dir = f"generated/{game_id}/properties/{self.name.name.lower()}.json"
+        path = Path(dir)
+
+        if not path.is_file():
+            return self
+
+        with open(dir, "r") as f:
+            data = json.load(f)
+            self.owner = data["owner"]
+            self.house_count = data["house_count"]
+        return self
+
+    def update_ownership(self, new_owner):
+        self.owner = new_owner
+        return self
+
+    def base_self(self):
+        return Property(
+            self.name,
+            self.color,
+            self.price,
+            self.house_price,
+            self.rent,
+            self.mortgage,
+        )
+
+    def save(self, game_id):
+        with open(
+            f"generated/{game_id}/properties/{self.name.name.lower()}.json", "w"
+        ) as f:
+            json.dump({"owner": self.owner.name, "house_count": self.house_count}, f)
+            f.close()
+        return self
+
     def table(self):
         table = Table()
+        table.box = box.SIMPLE
 
+        table.add_column("Price", style="green")
+        table.add_column("House price", style="cyan")
         table.add_column("Rent", style="cyan")
-        table.add_column("Price", style="red")
+        table.add_column("1 house", style="red")
+        table.add_column("2 houses", style="red")
+        table.add_column("3 houses", style="red")
+        table.add_column("4 houses", style="red")
+        table.add_column("Hotel", style="red")
+        table.add_column("Mortgage", style="green")
 
-        table.add_row("base", f"${self.rent[0]}")
-        table.add_row("1 house", f"${self.rent[1]}")
-        table.add_row("2 houses", f"${self.rent[2]}")
-        table.add_row("3 houses", f"${self.rent[3]}")
-        table.add_row("4 houses", f"${self.rent[4]}")
-        table.add_row("hotel", f"${self.rent[5]}")
+        table.add_row(
+            f"${self.price}",
+            f"${self.house_price}",
+            f"${self.rent[0]}",
+            f"${self.rent[1]}",
+            f"${self.rent[2]}",
+            f"${self.rent[3]}",
+            f"${self.rent[4]}",
+            f"${self.rent[5]}",
+            f"${self.mortgage}",
+        )
 
         return table
 
