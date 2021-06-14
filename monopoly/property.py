@@ -79,6 +79,8 @@ class Property:
             color = "orange4"
         elif self.color == Colors.LIGHTBLUE:
             color = "turquoise2"
+        elif self.color == Colors.ORANGE:
+            color = "dark_orange"
 
         return f"[{color}]{self.name.value}[/{color}]"
 

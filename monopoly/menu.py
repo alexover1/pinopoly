@@ -3,7 +3,7 @@ from monopoly.user import get_users
 from monopoly.player import create_players, get_players
 from dataclasses import dataclass
 from rich.console import Console
-import enquiries
+import enquiries, art
 
 
 ############################################
@@ -16,8 +16,6 @@ class Menu:
     console = Console()
 
     def start_new_game(self):
-        self.console.clear()
-
         users = get_users()
         if not users:
             exit(0)
@@ -28,12 +26,12 @@ class Menu:
         players = create_players(game.id, chosen_users)
 
         game.update_players(players)
+
+        self.console.clear()
         run(game)
 
     def resume_game(self):
-        self.console.clear()
         games = all_games()
-
         if len(games) == 0:
             exit(0)
 
@@ -44,7 +42,8 @@ class Menu:
         if chosen_game == "Cancel":
             exit(0)
 
-        run(chosen_game)  # type: ignore
+        self.console.clear()
+        run(chosen_game)
 
     def exit(self):
         self.console.clear()

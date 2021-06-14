@@ -54,7 +54,7 @@ class Player:
         table.box = box.SIMPLE
 
         table.add_column("Property")
-        table.add_column("Price", style="green")
+        table.add_column("Houses")
         table.add_column("House price", style="cyan")
         table.add_column("Rent", style="cyan")
         table.add_column("Mortgage", style="green")
@@ -62,7 +62,7 @@ class Player:
         for p in properties:
             table.add_row(
                 f"{p.colored()}",
-                f"${p.price}",
+                f"{p.house_count}",
                 f"${p.house_price}",
                 f"${p.rent[p.house_count]}",
                 f"${p.mortgage}",
