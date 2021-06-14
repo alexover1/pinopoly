@@ -134,19 +134,21 @@ class Turn:
             filter(lambda x: x.name != self.player.name, self.game.players)
         )
 
+        # Get player
         chosen_player = choose(
             "Who are you paying rent to?", [*filtered_players, "Go back"]
         )
-
         if chosen_player == "Go back":
             return self.go_back()
 
-        properties = chosen_player.get_properties()
-        chosen_property = choose("Which property?", [*properties, "Go back"])
-
+        # Get property
+        chosen_property = choose(
+            "Which property?", [*chosen_player.get_properties(), "Go back"]
+        )
         if chosen_property == "Go back":
             return self.go_back()
 
+        # Pay rent
         rent = chosen_property.rent[chosen_property.house_count]
         self.player.balance -= rent
         self.go_back(
