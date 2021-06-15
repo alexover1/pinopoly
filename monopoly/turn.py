@@ -66,6 +66,14 @@ class Turn:
         p = random.randint(0, len(monopoly.property.properties) - 1)
         property = monopoly.property.properties[p].load(self.game.id)
 
+        if property.owner:
+            return self.go_back(f"That property is already owned by {property.owner}")
+
+        if (self.player.balance - property.price) < 0:
+            return self.go_back(
+                f"You do not have enough money to buy {property.colored()}"
+            )
+
         self.console.print(Markdown(f"# {property.name.value}"))
         self.console.print(property.table())
         self.console.print(f"You currently have [green]${self.player.balance}[/green]")
