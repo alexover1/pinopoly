@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
-import json
+import json, glob
 from pathlib import Path
 from typing import Any
 from rich.table import Table
 from rich import box
+from pathlib import Path
 
 
 ############################################
@@ -335,3 +336,18 @@ properties = [
         200,
     ),
 ]
+
+
+############################################
+# METHODS
+############################################
+
+
+def get_all_properties(game_id):
+    list = []
+    for p in properties:
+        p.load(game_id)
+        if p.owner:
+            list.append(p)
+
+    return list

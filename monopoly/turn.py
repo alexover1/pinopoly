@@ -1,5 +1,6 @@
 import monopoly.player
 import monopoly.property
+import monopoly.logs
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -88,6 +89,11 @@ class Turn:
             self.player.save()
             property.update_ownership(self.player).save(self.game.id)
 
+            # Logs
+            monopoly.logs.Log(
+                self.game.id, self.player, property.price, property
+            ).visit(monopoly.logs.Logs.BUY_PROPERTY)
+
             self.console.clear()
             return self.game.advance()
 
@@ -127,6 +133,11 @@ class Turn:
             self.player.balance -= property.price
             self.player.save()
 
+            # Logs
+            monopoly.logs.Log(self.game.id, self.player, other=property).visit(
+                monopoly.logs.Logs.BUY_HOUSE
+            )
+
         self.go_back()
 
     ############################################
@@ -138,29 +149,32 @@ class Turn:
             a = f.read()
             self.console.print(a)
 
-        filtered_players = list(
-            filter(lambda x: x.name != self.player.name, self.game.players)
-        )
-
-        # Get player
-        chosen_player = choose(
-            "Who are you paying rent to?", [*filtered_players, "Go back"]
-        )
-        if chosen_player == "Go back":
-            return self.go_back()
-
         # Get property
-        chosen_property = choose(
-            "Which property?", [*chosen_player.get_properties(), "Go back"]
-        )
+        properties = monopoly.property.get_all_properties(self.game.id)
+        chosen_property = choose("Which property?", [*properties, "Go back"])
         if chosen_property == "Go back":
             return self.go_back()
 
         # Pay rent
         rent = chosen_property.rent[chosen_property.house_count]
+
+        owner = monopoly.player.get(chosen_property.owner, self.game.id)
+        if not owner:
+            return self.go_back()
+
         self.player.balance -= rent
+        self.player.save()
+
+        owner.balance += rent
+        owner.save()
+
+        # Logs
+        monopoly.logs.Log(self.game.id, self.player, rent, owner).visit(
+            monopoly.logs.Logs.PAY_RENT
+        )
+
         self.go_back(
-            f"You now have [green]${self.player.balance}[/green] ([red]-${rent}[/red])"
+            f"You payed [green]${rent}[/green] to [pink]{chosen_property.owner}[/pink] and now have [green]${self.player.balance}[/green]"
         )
 
     ############################################

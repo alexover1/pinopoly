@@ -1,3 +1,4 @@
+from pathlib import Path
 from monopoly.property import Colors, properties
 from dataclasses import dataclass, field
 from rich.table import Table
@@ -82,6 +83,17 @@ class Player:
 ############################################
 # METHODS
 ###########################################
+
+
+def get(name, game_id):
+    path = Path(f"generated/{game_id}/players/{name}.json")
+
+    if not path.exists():
+        return None
+
+    with path.open() as f:
+        data = json.load(f)
+        return Player(name, game_id, data["balance"], data["properties"])
 
 
 def get_players(game_id):
