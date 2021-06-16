@@ -104,6 +104,7 @@ class Game:
             f"It's {self.players[self.turn]}'s turn",
             [
                 "Properties",
+                "Scoreboard",
                 "Pay rent",
                 "End turn",
                 "Exit game",
@@ -122,7 +123,11 @@ class Game:
 
 def run(game: Game):
     while True:
-        game.take_turn()
+        try:
+            game.take_turn()
+        except Exception as e:
+            console = Console()
+            console.print("\n[red]error[/red] " + str(e) + "\n")
 
 
 def all_games() -> List[Game]:

@@ -5,12 +5,14 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 from rich.markdown import Markdown
+from rich.table import Table
 from enquiries import *
 import random, time
 
 
 class Moves(Enum):
     BUY_PROPERTY = ("Properties", "properties")
+    SCOREBOARD = ("Scoreboard", "scoreboard")
     PAY_RENT = ("Pay rent", "rent")
     END_TURN = ("End turn", "end_turn")
     EXIT = ("Exit game", "exit")
@@ -99,6 +101,33 @@ class Turn:
 
         self.console.clear()
         self.go_back()
+
+    ############################################
+
+    def visit_scoreboard(self, _):
+        """Displays a list of information about the players"""
+        players = sorted(
+            monopoly.player.get_players(self.game.id),
+            key=lambda x: x.balance,
+            reverse=True,
+        )
+
+        table = Table()
+        table.add_column("Name")
+        table.add_column("Net worth", style="green")
+        table.add_column("Properties")
+
+        for player in players:
+            table.add_row(
+                player.name, f"${player.balance}", str(len(player.properties))
+            )
+
+        self.console.print(table)
+
+        choice = choose("", ["Go back"])
+
+        if choice:
+            self.go_back()
 
     ############################################
 
